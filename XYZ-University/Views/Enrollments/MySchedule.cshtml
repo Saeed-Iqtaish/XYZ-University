@@ -1,0 +1,78 @@
+﻿@model IEnumerable<XYZ_University.Models.Enrollment>
+
+@{
+    ViewData["Title"] = "My Current Schedule";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<div class="container py-4">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Current Schedule</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-auto">
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-list-ul text-info me-2"></i> Current Schedule
+            </h2>
+            <p class="text-muted">Courses currently in progress (Ungraded).</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0 border-top border-4 border-info">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-light text-secondary border font-monospace">
+                                CS@(item.CourseId)
+                            </span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                @item.Course.Credits Credits
+                            </span>
+                        </div>
+
+                        <h4 class="card-title fw-bold text-dark mb-3">@item.Course.Title</h4>
+
+                        <div class="d-flex align-items-center text-muted mb-4">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <span>
+                                @(item.Course.Instructor?.FirstName ?? "Staff") @(item.Course.Instructor?.LastName ?? "")
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <span class="text-success fw-bold small text-uppercase">
+                                <i class="bi bi-circle-fill small me-1"></i> In Progress
+                            </span>
+
+                            <button class="btn btn-sm btn-outline-secondary disabled">
+                                View Materials
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-light border shadow-sm text-center p-5">
+                    <i class="bi bi-calendar-x fs-1 text-muted mb-3"></i>
+                    <h5 class="fw-bold text-secondary">No Active Courses</h5>
+                    <p class="text-muted">You have no courses currently in progress.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,46 @@
+﻿@model XYZ_University.Models.Office
+
+@{
+    ViewData["Title"] = "Create Office";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h3 class="fw-bold mb-0">Assign New Office</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Location" class="control-label fw-bold small text-uppercase mb-1">Office Location</label>
+                            <input asp-for="Location" class="form-control" placeholder="e.g. Science Hall, Room 101" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="InstructorId" class="control-label fw-bold small text-uppercase mb-1">Assign Instructor (Optional)</label>
+                            <select asp-for="InstructorId" class="form-select" asp-items="ViewBag.InstructorId">
+                                <option value="">-- Unassigned (Vacant) --</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary fw-bold">Save Assignment</button>
+                            <a asp-action="Index" class="btn btn-light text-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

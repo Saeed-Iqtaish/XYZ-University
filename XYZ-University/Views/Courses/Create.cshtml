@@ -1,0 +1,135 @@
+﻿@model XYZ_University.Models.Course
+
+@{
+    ViewData["Title"] = "Create Course";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white border-bottom p-4">
+                    <h3 class="fw-bold mb-0">Create New Course</h3>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Title" class="control-label fw-bold small text-uppercase mb-1">Course Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Intro to AI" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Credits" class="control-label fw-bold small text-uppercase mb-1">Credits</label>
+                            <input asp-for="Credits" class="form-control" />
+                            <span asp-validation-for="Credits" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="DepartmentId" class="control-label fw-bold small text-uppercase mb-1">Department</label>
+                            <select asp-for="DepartmentId" class="form-select" asp-items="ViewBag.DepartmentId">
+                                <option value="">-- Select Department --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="InstructorId" class="control-label fw-bold small text-uppercase mb-1">Assigned Instructor</label>
+                            <select asp-for="InstructorId" id="InstructorId" class="form-select" disabled>
+                                <option value="">-- Select a Department First --</option>
+                            </select>
+                        </div>
+
+                        <hr />
+
+                        <div class="form-group mb-3">
+                            <label class="control-label fw-bold small text-uppercase mb-1">Course Type</label>
+                            <select name="CourseType" id="courseTypeSelector" class="form-select" onchange="toggleTypeFields()">
+                                <option value="Standard">Standard Course</option>
+                                <option value="Lab">Lab Session</option>
+                                <option value="Online">Online Course</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3" id="labFields" style="display:none;">
+                            <label for="LabSoftware" class="control-label fw-bold small text-uppercase mb-1">Lab Software</label>
+                            <input name="LabSoftware" class="form-control" />
+                        </div>
+
+                        <div class="form-group mb-3" id="onlineFields" style="display:none;">
+                            <label for="Platform" class="control-label fw-bold small text-uppercase mb-1">Online Platform</label>
+                            <input name="Platform" class="form-control" />
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <submit-btn text="Create New Course"></submit-btn>
+
+                            <a asp-action="Index" class="btn btn-light text-secondary border">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#DepartmentId').change(function () {
+                var departmentId = $(this).val();
+                var $instructorSelect = $('#InstructorId');
+
+                $instructorSelect.empty();
+                $instructorSelect.append('<option value="">Loading Instructors...</option>');
+                $instructorSelect.prop('disabled', true);
+
+                if (departmentId) {
+                    $.ajax({
+                        url: '/Courses/GetInstructorsByDepartment',
+                        type: 'GET',
+                        data: { departmentId: departmentId },
+                        success: function (data) {
+                            $instructorSelect.empty();
+
+                            if (data.length === 0) {
+                                $instructorSelect.append('<option value="">-- No Instructors found in this Department --</option>');
+                            } else {
+                                $instructorSelect.append('<option value="">-- Select Instructor --</option>');
+                                $.each(data, function (i, instructor) {
+                                    $instructorSelect.append($('<option></option>').val(instructor.id).html(instructor.fullName));
+                                });
+                                $instructorSelect.prop('disabled', false);
+                            }
+                        },
+                        error: function () {
+                            $instructorSelect.empty();
+                            $instructorSelect.append('<option value="">Error loading instructors</option>');
+                        }
+                    });
+                } else {
+                    $instructorSelect.empty();
+                    $instructorSelect.append('<option value="">-- Select a Department First --</option>');
+                    $instructorSelect.prop('disabled', true);
+                }
+            });
+
+            $('#courseTypeSelector').change(function() {
+                toggleTypeFields();
+            });
+        });
+
+        function toggleTypeFields() {
+            var type = document.getElementById("courseTypeSelector").value;
+            document.getElementById("labFields").style.display = (type === "Lab") ? "block" : "none";
+            document.getElementById("onlineFields").style.display = (type === "Online") ? "block" : "none";
+        }
+    </script>
+}

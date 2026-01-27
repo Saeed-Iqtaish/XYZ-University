@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using XYZ_University.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        /* --- LOGGED IN STATE --- */
+
+        // Fetch the current user from the database to get their Name
+        var currentUser = await UserManager.GetUserAsync(User);
+
+        // 1. User Name / Profile Link
+        <li class="nav-item">
+            <a id="manage" class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                <i class="bi bi-person-circle me-1"></i> Hello, @(currentUser?.FirstName ?? currentUser?.Email)!
+            </a>
+        </li>
+
+        // 2. Logout Button
+        <li class="nav-item">
+            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button id="logout" type="submit" class="nav-link btn btn-link text-light border-0" style="text-decoration: none;">
+                    Logout
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        /* --- LOGGED OUT STATE --- */
+
+        // 3. Register Link
+        <li class="nav-item">
+            <a class="nav-link text-light" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+
+        // 4. Login Link
+        <li class="nav-item">
+            <a class="nav-link text-light" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
+</ul>

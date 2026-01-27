@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using XYZ_University.Models
+@model IEnumerable<ApplicationUser>
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<div class="container py-4">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">User Management</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary me-3 shadow-sm">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+            <h2 class="mb-0 fw-bold">
+                <i class="bi bi-people-fill text-primary me-2"></i> User Management
+            </h2>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">User</th>
+                        <th>Email</th>
+                        <th>Current Role</th>
+                        <th>Office</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        // --- LOGIC: Fetch Role & Color ---
+                        var roles = await UserManager.GetRolesAsync(user);
+                        var role = roles.FirstOrDefault() ?? "None";
+
+                        string badgeClass = "bg-secondary";
+                        if (role == "Admin") { badgeClass = "bg-danger"; }
+                        else if (role == "Instructor") { badgeClass = "bg-primary"; }
+                        else if (role == "Student") { badgeClass = "bg-success"; }
+                        // ---------------------------------
+
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded-circle p-2 me-3 text-secondary border">
+                                        <i class="bi bi-person-fill fs-5"></i>
+                                    </div>
+                                    <span class="fw-bold text-dark">
+                                        @(user.FirstName ?? "Unknown") @(user.LastName ?? "User")
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="text-muted">@user.Email</td>
+
+                            <td>
+                                <span class="badge rounded-pill @badgeClass px-3 py-2 border border-light shadow-sm">
+                                    @role
+                                </span>
+                            </td>
+
+                            <td class="text-muted fst-italic">
+                                @if (user.Office != null)
+                                {
+                                    <span>@user.Office.Location</span>
+                                }
+                                else
+                                {
+                                    <span class="text-black-50">None</span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <a asp-action="AssignRole" asp-route-userId="@user.Id" class="btn btn-sm btn-outline-primary">
+                                    Edit Role
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

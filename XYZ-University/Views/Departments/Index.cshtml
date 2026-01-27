@@ -1,0 +1,95 @@
+﻿@{
+    ViewData["Title"] = "Departments";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary me-3 shadow-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+            <h2 class="mb-0 fw-bold">
+                <i class="bi bi-building text-primary me-2"></i> Departments List
+            </h2>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">Code</th>
+                        <th>Department Name</th>
+                        <th>Statistics</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="3" class="text-center p-5">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p class="text-muted">Loading data from API...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const API_URL = "https://localhost:7268/api/Departments";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDepartments();
+        });
+
+        async function loadDepartments() {
+            const tableBody = document.getElementById("tableBody");
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                tableBody.innerHTML = "";
+
+                if (data.length === 0) {
+                     tableBody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-muted">No departments found.</td></tr>`;
+                     return;
+                }
+
+                data.forEach(dept => {
+                    const row = `
+                        <tr>
+                            <td class="ps-4 fw-bold text-secondary font-monospace">
+                                ${dept.code}
+                            </td>
+                            <td class="fw-bold text-dark">
+                                ${dept.name}
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info px-3">
+                                    ${dept.courseCount} Courses
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center p-4 text-danger">
+                            <strong>Connection Failed</strong><br/>
+                            Could not reach the API at ${API_URL}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    </script>
+}

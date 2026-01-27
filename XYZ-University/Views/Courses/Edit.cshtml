@@ -1,0 +1,135 @@
+﻿@model XYZ_University.Models.Course
+@using XYZ_University.Models
+
+@{
+    ViewData["Title"] = "Edit Course";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white border-bottom p-4">
+                    <h3 class="fw-bold mb-0">Edit Course</h3>
+                    <p class="text-muted small mb-0">Editing <strong>@Model.Title</strong></p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="CourseId" />
+
+                        <input type="hidden" name="CourseType" value="@(Model is Lab ? "Lab" : (Model is OnlineCourse ? "Online" : "Standard"))" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Title" class="control-label fw-bold small text-uppercase mb-1">Course Title</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Credits" class="control-label fw-bold small text-uppercase mb-1">Credits</label>
+                            <input asp-for="Credits" class="form-control" />
+                            <span asp-validation-for="Credits" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="DepartmentId" class="control-label fw-bold small text-uppercase mb-1">Department</label>
+                            <select asp-for="DepartmentId" id="DepartmentId" class="form-select" asp-items="ViewBag.DepartmentId"></select>
+                            <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="InstructorId" class="control-label fw-bold small text-uppercase mb-1">Assigned Instructor</label>
+                            <select asp-for="InstructorId" id="InstructorId" class="form-select">
+                                <option value="">Loading...</option>
+                            </select>
+                            <span asp-validation-for="InstructorId" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        @if (Model is Lab labCourse)
+                        {
+                            <div class="form-group mb-4">
+                                <div class="badge bg-warning text-dark mb-2">Lab Session</div>
+                                <label class="control-label fw-bold small text-uppercase mb-1 d-block">Lab Software</label>
+                                <input name="LabSoftware" class="form-control" value="@labCourse.LabSoftware" />
+                            </div>
+                        }
+                        else if (Model is OnlineCourse onlineCourse)
+                        {
+                            <div class="form-group mb-4">
+                                <div class="badge bg-info text-dark mb-2">Online Course</div>
+                                <label class="control-label fw-bold small text-uppercase mb-1 d-block">Online Platform</label>
+                                <input name="Platform" class="form-control" value="@onlineCourse.Platform" />
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2">
+                            <submit-btn text="Save Changes"></submit-btn>
+                            <a asp-action="Index" class="btn btn-light text-secondary border">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            var currentDepartmentId = '@Model.DepartmentId';
+            var currentInstructorId = '@Model.InstructorId';
+
+            loadInstructors(currentDepartmentId, currentInstructorId);
+
+            $('#DepartmentId').change(function () {
+                var newDeptId = $(this).val();
+                loadInstructors(newDeptId, null);
+            });
+
+            function loadInstructors(deptId, preselectedId) {
+                var $instructorSelect = $('#InstructorId');
+                $instructorSelect.prop('disabled', true);
+
+                if (deptId) {
+                    $.ajax({
+                        url: '/Courses/GetInstructorsByDepartment',
+                        type: 'GET',
+                        data: { departmentId: deptId, selectedInstructorId: preselectedId },
+                        success: function (data) {
+                            $instructorSelect.empty();
+
+                            if (data.length === 0) {
+                                $instructorSelect.append('<option value="">-- No Instructors found --</option>');
+                            } else {
+                                $instructorSelect.append('<option value="">-- Select Instructor --</option>');
+
+                                $.each(data, function (i, instructor) {
+                                    var isSelected = (instructor.id === preselectedId) ? 'selected' : '';
+                                    $instructorSelect.append('<option value="' + instructor.id + '" ' + isSelected + '>' + instructor.fullName + '</option>');
+                                });
+
+                                $instructorSelect.prop('disabled', false);
+                            }
+                        },
+                        error: function () {
+                            $instructorSelect.empty();
+                            $instructorSelect.append('<option value="">Error loading data</option>');
+                        }
+                    });
+                } else {
+                    $instructorSelect.empty();
+                    $instructorSelect.append('<option value="">-- Select Department First --</option>');
+                }
+            }
+        });
+    </script>
+}
